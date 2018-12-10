@@ -93,18 +93,18 @@ Y_ph = tf.placeholder(tf.float32, shape=[None,15])
 initializer = tf.variance_scaling_initializer()  # He initializer is used instead of Xavier initialisation
 
 
-w1 = tf.Variable(initializer([num_inputs, neurons_hid1]), dtype=tf.float32)
-w2 = tf.Variable(initializer([neurons_hid1, neurons_hid2]), dtype=tf.float32)
-w3 = tf.Variable(initializer([neurons_hid2, neurons_hid3]), dtype=tf.float32)
-w4 = tf.Variable(initializer([neurons_hid3, num_outputs]), dtype=tf.float32)
+w1 = tf.Variable(initializer([num_inputs, neurons_hid1]), dtype=tf.float32,name='w1')
+w2 = tf.Variable(initializer([neurons_hid1, neurons_hid2]), dtype=tf.float32,name='w2')
+w3 = tf.Variable(initializer([neurons_hid2, neurons_hid3]), dtype=tf.float32,name='w3')
+w4 = tf.Variable(initializer([neurons_hid3, num_outputs]), dtype=tf.float32,name='w4')
 
 
 # Biases
 
-b1 = tf.Variable(tf.zeros(neurons_hid1))
-b2 = tf.Variable(tf.zeros(neurons_hid2))
-b3 = tf.Variable(tf.zeros(neurons_hid3))
-b4 = tf.Variable(tf.zeros(num_outputs))
+b1 = tf.Variable(tf.zeros(neurons_hid1),name='b1')
+b2 = tf.Variable(tf.zeros(neurons_hid2),name='b2')
+b3 = tf.Variable(tf.zeros(neurons_hid3),name='b3')
+b4 = tf.Variable(tf.zeros(num_outputs),name='b4')
 
 # layers description
 
@@ -123,7 +123,11 @@ loss = tf.reduce_mean(\
 l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005)
 weights = tf.trainable_variables() # all vars of the graph
 regularization_penalty = tf.contrib.layers.apply_regularization(l1_regularizer, weights)
-regularized_loss = loss + regularization_penalty
+
+l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
+                           if 'b' not in v.name ]) * 0.001
+
+regularized_loss = loss + regularization_penalty +l2_regularizer
 
 # optimizer
 
