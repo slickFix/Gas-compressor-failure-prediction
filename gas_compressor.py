@@ -83,9 +83,9 @@ tf.reset_default_graph()
 # parameters
 
 num_inputs = 25  
-neurons_hid1 = 50 
-neurons_hid2 = 100 
-neurons_hid3 = 50
+neurons_hid1 = 18 
+neurons_hid2 = 9 
+neurons_hid3 = 5
 num_outputs =15
 
 learning_rate = 0.001
