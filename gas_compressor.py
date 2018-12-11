@@ -68,7 +68,7 @@ scaled_data_X_s = MinMaxScaler().fit_transform(X_s)
 from sklearn.model_selection import train_test_split
 
 X_train_s, X_test_s, y_train_s, y_test_s = \
-    train_test_split(scaled_data_X_s, Y_s_ohe, test_size=0.80, random_state=42)
+    train_test_split(scaled_data_X_s, Y_s_ohe, test_size=0.20, random_state=42)
     
 # =============================================================================
 # # tensorflow code
