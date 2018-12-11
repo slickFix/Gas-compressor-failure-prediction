@@ -204,7 +204,7 @@ with tf.Session() as sess:
         
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
     
-    saver.save(sess, "./model_ckpt/gas_compressor.ckpt")
+    saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
 
 model_stop = datetime.now()
 
@@ -215,7 +215,7 @@ print("Model trainging time "+str(model_stop-model_start))
 
 with tf.Session() as sess:
     
-    saver.restore(sess,"./model_ckpt/gas_compressor.ckpt")
+    saver.restore(sess,"./model_ckpt1/gas_compressor.ckpt")
     
     
     feed = {X_ph:X_test_s.astype(np.float32),  
