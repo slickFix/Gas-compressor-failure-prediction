@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 import os
-
+import pickle
 from datetime import datetime
 
 
@@ -15,19 +15,34 @@ os.getcwd()
 os.chdir('/home/siddharth/Downloads/Dataset/P_projects/Compressor data')
 
 
-# reading dataset
-start_red = datetime.now()
-print("Dataset reading starts")
+# =============================================================================
+# # reading dataset
+# start_red = datetime.now()
+# print("Dataset reading starts")
+# 
+# df  = pd.read_excel('30k_records.xlsx') # dataset reading ..
+# 
+# print("Dataset reading STOPS")
+# stop_red = datetime.now()
+# 
+# print("Dataset reading time "+str(stop_red-start_red))
+# 
+# # removing unnecessary columns
+# df = df.drop(['prop_th_dcy','prop_tq_dcy','hull_dcy','gt_turb_dcy','output_class'],axis = 1)
+# 
+# 
+# #saving dateset in the pickel file
+# outfile = open('dataset_pkl_file','wb')   #creates file even if it's not there
+# pickle.dump(df,outfile)
+# outfile.close()
+# =============================================================================
 
-df  = pd.read_excel('30k_records.xlsx') # dataset reading ..
+#reading datset from the pickel file
+infile = open('dataset_pkl_file','rb')
+df = pickle.load(infile)
+infile.close()
 
-print("Dataset reading STOPS")
-stop_red = datetime.now()
 
-print("Dataset reading time "+str(stop_red-start_red))
-
-# removing unnecessary columns
-df = df.drop(['prop_th_dcy','prop_tq_dcy','hull_dcy','gt_turb_dcy','output_class'],axis = 1)
 
 
 # creating subsample for testing
