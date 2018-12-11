@@ -5,20 +5,33 @@ import numpy as np
 import pandas as pd
 import os
 
+from datetime import datetime
+
+
+sample_fraction = 1
+
 # changing to dataset location
 os.getcwd()
 os.chdir('/home/siddharth/Downloads/Dataset/P_projects/Compressor data')
 
 
 # reading dataset
-df  = pd.read_excel('30k_records.xlsx')
+start_red = datetime.now()
+print("Dataset reading starts")
+
+df  = pd.read_excel('30k_records.xlsx') # dataset reading ..
+
+print("Dataset reading STOPS")
+stop_red = datetime.now()
+
+print("Dataset reading time "+str(stop_red-start_red))
 
 # removing unnecessary columns
 df = df.drop(['prop_th_dcy','prop_tq_dcy','hull_dcy','gt_turb_dcy','output_class'],axis = 1)
 
 
 # creating subsample for testing
-df_s = df.sample(frac = 0.01,random_state = 101)
+df_s = df.sample(frac = sample_fraction,random_state = 101)
 
 
 # creating X and Y variables 
@@ -85,7 +98,7 @@ act_func = tf.nn.relu
 # placeholder
 
 X_ph = tf.placeholder(tf.float32, shape=[None,num_inputs])
-Y_ph = tf.placeholder(tf.float32, shape=[None,15])
+Y_ph = tf.placeholder(tf.float32, shape=[None,num_outputs])
 
 
 # Weights initialization
@@ -120,14 +133,19 @@ loss = tf.reduce_mean(\
                       tf.nn.softmax_cross_entropy_with_logits \
                       ( labels = Y_ph,logits=output_layer) )
 
-l1_regularizer = tf.contrib.layers.l1_regularizer(scale=0.005)
+l1_l2_regularizer = tf.contrib.layers.l1_l2_regularizer(scale_l1=0.005,scale_l2=0.001 )
+
 weights = tf.trainable_variables() # all vars of the graph
-regularization_penalty = tf.contrib.layers.apply_regularization(l1_regularizer, weights)
 
-l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
-                           if 'b' not in v.name ]) * 0.001
+weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-regularized_loss = loss + regularization_penalty +l2_regularizer
+regularization_penalty = tf.contrib.layers.apply_regularization(\
+                            l1_l2_regularizer, weight_not_bias)
+
+#l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
+#                           if 'b' not in v.name ]) * 0.001
+
+regularized_loss = loss + regularization_penalty 
 
 # optimizer
 
@@ -147,6 +165,8 @@ saver = tf.train.Saver()
 
 num_epochs = 5
 batch_size = 10
+
+model_start = datetime.now()
 
 with tf.Session() as sess:
     
@@ -170,6 +190,10 @@ with tf.Session() as sess:
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
     
     saver.save(sess, "./model_ckpt/gas_compressor.ckpt")
+
+model_stop = datetime.now()
+
+print("Model trainging time "+str(model_stop-model_start))
 
 # Evaluating output
 
