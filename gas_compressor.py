@@ -8,7 +8,7 @@ import pickle
 from datetime import datetime
 
 
-sample_fraction = 1
+sample_fraction = 0.4
 
 # changing to dataset location
 os.getcwd()
