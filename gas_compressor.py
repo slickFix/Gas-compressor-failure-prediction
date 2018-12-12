@@ -154,13 +154,13 @@ weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-regularization_penalty = tf.contrib.layers.apply_regularization(\
-                            l1_l2_regularizer, weight_not_bias)
+#regularization_penalty = tf.contrib.layers.apply_regularization(\
+#                            l1_l2_regularizer, weight_not_bias)
 
 #l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
 #                           if 'b' not in v.name ]) * 0.001
 
-regularized_loss = loss + regularization_penalty 
+regularized_loss = loss #+ regularization_penalty 
 
 # optimizer
 
