@@ -118,10 +118,10 @@ Y_ph = tf.placeholder(tf.float32, shape=[None,num_outputs])
 initializer = tf.variance_scaling_initializer()  # He initializer is used instead of Xavier initialisation
 
 
-w1 = tf.Variable(initializer([num_inputs, neurons_hid1]), dtype=tf.float32,name='w1')
-w2 = tf.Variable(initializer([neurons_hid1, neurons_hid2]), dtype=tf.float32,name='w2')
-w3 = tf.Variable(initializer([neurons_hid2, neurons_hid3]), dtype=tf.float32,name='w3')
-w4 = tf.Variable(initializer([neurons_hid3, num_outputs]), dtype=tf.float32,name='w4')
+w1 = tf.Variable(initializer([neurons_hid1,num_inputs]), dtype=tf.float32,name='w1')
+w2 = tf.Variable(initializer([neurons_hid2,neurons_hid1 ]), dtype=tf.float32,name='w2')
+w3 = tf.Variable(initializer([neurons_hid3, neurons_hid2 ]), dtype=tf.float32,name='w3')
+w4 = tf.Variable(initializer([num_outputs , neurons_hid3]), dtype=tf.float32,name='w4')
 
 
 # Biases
