@@ -71,19 +71,16 @@ Y_s_le = LabelEncoder().fit_transform(Y_s)
 from sklearn.preprocessing import OneHotEncoder
 Y_s_ohe = OneHotEncoder().fit_transform(Y_s_le.reshape(-1,1))
 
-
-#scaling the data
-
-from sklearn.preprocessing import MinMaxScaler
-scaled_data_X_s = MinMaxScaler().fit_transform(X_s)
-
-
 # dividing the sample data into train and test set
-
 from sklearn.model_selection import train_test_split
 
 X_train_s, X_test_s, y_train_s, y_test_s = \
-    train_test_split(scaled_data_X_s, Y_s_ohe, test_size=0.20, random_state=42)
+    train_test_split(X_s, Y_s_ohe, test_size=0.20, random_state=42)
+    
+#scaling the data
+
+from sklearn.preprocessing import MinMaxScaler
+scaled_data_X_train_s= MinMaxScaler().fit_transform(X_train_s)
     
 # =============================================================================
 # # tensorflow code
