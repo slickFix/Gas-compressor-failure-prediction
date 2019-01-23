@@ -109,8 +109,8 @@ act_func = tf.nn.relu
 
 # placeholder
 
-X_ph = tf.placeholder(tf.float32, shape=[None,num_inputs])
-Y_ph = tf.placeholder(tf.float32, shape=[None,num_outputs])
+X_ph = tf.placeholder(tf.float32, shape=[num_inputs ,None])
+Y_ph = tf.placeholder(tf.float32, shape=[num_outputs,None ])
 
 
 # Weights initialization
@@ -126,17 +126,17 @@ w4 = tf.Variable(initializer([num_outputs , neurons_hid3]), dtype=tf.float32,nam
 
 # Biases
 
-b1 = tf.Variable(tf.zeros(neurons_hid1),name='b1')
-b2 = tf.Variable(tf.zeros(neurons_hid2),name='b2')
-b3 = tf.Variable(tf.zeros(neurons_hid3),name='b3')
-b4 = tf.Variable(tf.zeros(num_outputs),name='b4')
+b1 = tf.Variable(tf.zeros(neurons_hid1,1),name='b1')
+b2 = tf.Variable(tf.zeros(neurons_hid2,1),name='b2')
+b3 = tf.Variable(tf.zeros(neurons_hid3,1),name='b3')
+b4 = tf.Variable(tf.zeros(num_outputs,1),name='b4')
 
 # layers description
 
-hid_layer1 = act_func(tf.matmul(w1 , X_ph) + b1)
-hid_layer2 = act_func(tf.matmul(w2 , hid_layer1) + b2)
-hid_layer3 = act_func(tf.matmul(w3 , hid_layer2) + b3)
-output_layer = tf.matmul(w4 , hid_layer3) + b4
+hid_layer1 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+hid_layer2 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+hid_layer3 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+output_layer = tf.add(tf.matmul(w1 , X_ph),b1)
 
 
 # loss function
@@ -235,6 +235,5 @@ y_test_result_class_s = [i.argmax() for i in results]
 from sklearn.metrics import accuracy_score
 
 accuracy_score(y_test_class_s,y_test_result_class_s)
-
 
 
