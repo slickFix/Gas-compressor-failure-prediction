@@ -134,10 +134,10 @@ b4 = tf.Variable(tf.zeros(num_outputs),name='b4')
 
 # layers description
 
-hid_layer1 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
-hid_layer2 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
-hid_layer3 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
-output_layer = tf.add(tf.matmul(w1 , X_ph),b1)
+hid_layer1 = act_func(tf.add(tf.matmul(X_ph  , w1),b1))
+hid_layer2 = act_func(tf.add(tf.matmul(X_ph  , w1),b1))
+hid_layer3 = act_func(tf.add(tf.matmul(X_ph  , w1),b1))
+output_layer = tf.add(tf.matmul(X_ph  , w1),b1)
 
 
 # loss function
