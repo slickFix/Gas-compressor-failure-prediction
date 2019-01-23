@@ -187,13 +187,13 @@ with tf.Session() as sess:
     
     for epoch in range(num_epochs):
         
-        no_batches = len(X_train_s) // batch_size
+        no_batches = len(scaled_data_X_train_s) // batch_size
         
         for step in range(no_batches):
                     
-            rand_ind = np.random.randint(len(X_train_s),size=batch_size)
+            rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
 
-            feed = {X_ph:X_train_s[rand_ind].astype(np.float32), 
+            feed = {X_ph:scaled_data_X_train_s[rand_ind].astype(np.float32), 
                     Y_ph:y_train_s[rand_ind].toarray().astype(np.float32) }   
 
             sess.run(train,feed_dict = feed)
