@@ -72,7 +72,6 @@ from sklearn.preprocessing import OneHotEncoder
 Y_s_ohe = OneHotEncoder().fit_transform(Y_s_le.reshape(-1,1))
 
 # dividing the sample data into train and test set
-
 from sklearn.model_selection import train_test_split
 
 X_train_s, X_test_s, y_train_s, y_test_s = \
@@ -81,9 +80,7 @@ X_train_s, X_test_s, y_train_s, y_test_s = \
 #scaling the data
 
 from sklearn.preprocessing import MinMaxScaler
-scaled_data_X_train_s = MinMaxScaler().fit_transform(X_train_s)
-
-
+scaled_data_X_train_s= MinMaxScaler().fit_transform(X_train_s)
 
     
 # =============================================================================
@@ -113,8 +110,8 @@ act_func = tf.nn.relu
 
 # placeholder
 
-X_ph = tf.placeholder(tf.float32, shape=[None,num_inputs])
-Y_ph = tf.placeholder(tf.float32, shape=[None,num_outputs])
+X_ph = tf.placeholder(tf.float32, shape=[num_inputs ,None])
+Y_ph = tf.placeholder(tf.float32, shape=[num_outputs,None ])
 
 
 # Weights initialization
@@ -122,25 +119,25 @@ Y_ph = tf.placeholder(tf.float32, shape=[None,num_outputs])
 initializer = tf.variance_scaling_initializer()  # He initializer is used instead of Xavier initialisation
 
 
-w1 = tf.Variable(initializer([num_inputs, neurons_hid1]), dtype=tf.float32,name='w1')
-w2 = tf.Variable(initializer([neurons_hid1, neurons_hid2]), dtype=tf.float32,name='w2')
-w3 = tf.Variable(initializer([neurons_hid2, neurons_hid3]), dtype=tf.float32,name='w3')
-w4 = tf.Variable(initializer([neurons_hid3, num_outputs]), dtype=tf.float32,name='w4')
+w1 = tf.Variable(initializer([neurons_hid1,num_inputs]), dtype=tf.float32,name='w1')
+w2 = tf.Variable(initializer([neurons_hid2,neurons_hid1 ]), dtype=tf.float32,name='w2')
+w3 = tf.Variable(initializer([neurons_hid3, neurons_hid2 ]), dtype=tf.float32,name='w3')
+w4 = tf.Variable(initializer([num_outputs , neurons_hid3]), dtype=tf.float32,name='w4')
 
 
 # Biases
 
-b1 = tf.Variable(tf.zeros(neurons_hid1),name='b1')
-b2 = tf.Variable(tf.zeros(neurons_hid2),name='b2')
-b3 = tf.Variable(tf.zeros(neurons_hid3),name='b3')
-b4 = tf.Variable(tf.zeros(num_outputs),name='b4')
+b1 = tf.Variable(tf.zeros(neurons_hid1,1),name='b1')
+b2 = tf.Variable(tf.zeros(neurons_hid2,1),name='b2')
+b3 = tf.Variable(tf.zeros(neurons_hid3,1),name='b3')
+b4 = tf.Variable(tf.zeros(num_outputs,1),name='b4')
 
 # layers description
 
-hid_layer1 = act_func(tf.matmul(X_ph, w1) + b1)
-hid_layer2 = act_func(tf.matmul(hid_layer1, w2) + b2)
-hid_layer3 = act_func(tf.matmul(hid_layer2, w3) + b3)
-output_layer = tf.matmul(hid_layer3, w4) + b4
+hid_layer1 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+hid_layer2 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+hid_layer3 = act_func(tf.add(tf.matmul(w1 , X_ph),b1))
+output_layer = tf.add(tf.matmul(w1 , X_ph),b1)
 
 
 # loss function
@@ -239,6 +236,5 @@ y_test_result_class_s = [i.argmax() for i in results]
 from sklearn.metrics import accuracy_score
 
 accuracy_score(y_test_class_s,y_test_result_class_s)
-
 
 
