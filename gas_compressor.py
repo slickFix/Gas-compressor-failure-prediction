@@ -208,6 +208,13 @@ model_stop = datetime.now()
 
 print("Model trainging time "+str(model_stop-model_start))
 
+
+#scaling the test data
+
+from sklearn.preprocessing import MinMaxScaler
+scaled_data_X_test_s = MinMaxScaler().fit_transform(X_test_s)
+
+
 # Evaluating output
 
 
@@ -216,7 +223,7 @@ with tf.Session() as sess:
     saver.restore(sess,"./model_ckpt1/gas_compressor.ckpt")
     
     
-    feed = {X_ph:X_test_s.astype(np.float32),  
+    feed = {X_ph:scaled_data_X_test_s.astype(np.float32),  
             Y_ph:y_test_s.toarray().astype(np.float32) }
     
     results = output_layer.eval(feed_dict=feed)
