@@ -37,12 +37,16 @@ os.chdir('/home/siddharth/Downloads/Dataset/P_projects/Compressor data')
 # outfile.close()
 # =============================================================================
 
+# =============================================================================
+# #reading datset from the pickel file
+# infile = open('dataset_pkl_file','rb')
+# df = pickle.load(infile)
+# infile.close()
+# =============================================================================
+
 #reading datset from the pickel file
-infile = open('dataset_pkl_file','rb')
-df = pickle.load(infile)
-infile.close()
-
-
+with open('dataset_pkl_file','rb') as f:
+    df = pickle.load(f)
 
 
 # creating subsample for testing
