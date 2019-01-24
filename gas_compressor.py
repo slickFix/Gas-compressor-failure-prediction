@@ -181,7 +181,7 @@ saver = tf.train.Saver()
 
 # Training tensoflow model
 
-num_epochs = 15
+num_epochs = 20
 batch_size = 100
 
 model_start = datetime.now()
