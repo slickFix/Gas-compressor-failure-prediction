@@ -151,7 +151,7 @@ loss = tf.reduce_mean(\
                       tf.nn.softmax_cross_entropy_with_logits \
                       ( labels = Y_ph,logits=output_layer) )
 
-l1_regularizer = tf.contrib.layers.l1_regularizer(0.005)
+l1_regularizer = tf.contrib.layers.l1_regularizer(0.000005)
 
 weights = tf.trainable_variables() # all vars of the graph
 
@@ -186,6 +186,35 @@ batch_size = 10
 
 model_start = datetime.now()
 
+# =============================================================================
+# =============================================================================
+#  Random selection of training examples
+# =============================================================================
+# with tf.Session() as sess:
+#     
+#     sess.run(init)
+#     
+#     for epoch in range(num_epochs):
+#         
+#         no_batches = len(scaled_data_X_train_s) // batch_size
+#         
+#         for step in range(no_batches):
+#                     
+#             rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
+# 
+#             feed = {X_ph:scaled_data_X_train_s[rand_ind].astype(np.float32), 
+#                     Y_ph:y_train_s[rand_ind].toarray().astype(np.float32) }   
+# 
+#             sess.run(train,feed_dict = feed)
+#             
+#         training_loss = regularized_loss.eval(feed_dict=feed)   
+#         
+#         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
+#     
+#     saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
+# =============================================================================
+
+# Batch feeding of training examples
 with tf.Session() as sess:
     
     sess.run(init)
@@ -194,12 +223,18 @@ with tf.Session() as sess:
         
         no_batches = len(scaled_data_X_train_s) // batch_size
         
-        for step in range(no_batches):
+        for step in range(no_batches+1):
                     
             rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
-
-            feed = {X_ph:scaled_data_X_train_s[rand_ind].astype(np.float32), 
-                    Y_ph:y_train_s[rand_ind].toarray().astype(np.float32) }   
+            
+            feed  = {}
+            
+            if step != no_batches:
+                feed[X_ph] = scaled_data_X_train_s[step*batch_size:(step+1)*batch_size].astype(np.float32)
+                feed[Y_ph] = y_train_s[step*batch_size:(step+1)*batch_size].toarray().astype(np.float32) 
+            else:
+                feed[X_ph] = scaled_data_X_train_s[step*batch_size : ].astype(np.float32)
+                feed[Y_ph] = y_train_s[step*batch_size: ].toarray().astype(np.float32) 
 
             sess.run(train,feed_dict = feed)
             
