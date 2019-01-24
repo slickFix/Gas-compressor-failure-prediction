@@ -8,7 +8,7 @@ import pickle
 from datetime import datetime
 
 
-sample_fraction = 0.4
+sample_fraction = 0.6
 
 # changing to dataset location
 os.getcwd()
@@ -142,7 +142,7 @@ b4 = tf.Variable(tf.zeros(num_outputs),name='b4')
 hid_layer1 = act_func(tf.add(tf.matmul(X_ph, w1),b1))
 hid_layer2 = act_func(tf.add(tf.matmul(hid_layer1, w2),b2))
 hid_layer3 = act_func(tf.add(tf.matmul(hid_layer2, w3),b3))
-output_layer = act_func_output(tf.add(tf.matmul(hid_layer3, w4),b4))
+output_layer =tf.add(tf.matmul(hid_layer3, w4),b4)
 
 
 # loss function
@@ -151,19 +151,19 @@ loss = tf.reduce_mean(\
                       tf.nn.softmax_cross_entropy_with_logits \
                       ( labels = Y_ph,logits=output_layer) )
 
-l1_regularizer = tf.contrib.layers.l1_regularizer(0.000005)
+#l1_regularizer = tf.contrib.layers.l1_regularizer(0.000005)
 
 weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-regularization_penalty = tf.contrib.layers.apply_regularization(\
-                            l1_regularizer, weight_not_bias)
+#regularization_penalty = tf.contrib.layers.apply_regularization(\
+#                           l1_regularizer, weight_not_bias)
 
 #l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
 #                           if 'b' not in v.name ]) * 0.001
 
-regularized_loss = loss + regularization_penalty 
+regularized_loss = loss #+ regularization_penalty 
 
 # optimizer
 
@@ -181,8 +181,8 @@ saver = tf.train.Saver()
 
 # Training tensoflow model
 
-num_epochs = 5
-batch_size = 10
+num_epochs = 15
+batch_size = 100
 
 model_start = datetime.now()
 
@@ -225,7 +225,6 @@ with tf.Session() as sess:
         
         for step in range(no_batches+1):
                     
-            rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
             
             feed  = {}
             
