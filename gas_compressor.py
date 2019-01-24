@@ -151,19 +151,19 @@ loss = tf.reduce_mean(\
                       tf.nn.softmax_cross_entropy_with_logits \
                       ( labels = Y_ph,logits=output_layer) )
 
-l1_l2_regularizer = tf.contrib.layers.l1_l2_regularizer(scale_l1=0.005,scale_l2=0.001 )
+l1_regularizer = tf.contrib.layers.l1_regularizer(0.005)
 
 weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-#regularization_penalty = tf.contrib.layers.apply_regularization(\
-#                            l1_l2_regularizer, weight_not_bias)
+regularization_penalty = tf.contrib.layers.apply_regularization(\
+                            l1_regularizer, weight_not_bias)
 
 #l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
 #                           if 'b' not in v.name ]) * 0.001
 
-regularized_loss = loss #+ regularization_penalty 
+regularized_loss = loss + regularization_penalty 
 
 # optimizer
 
