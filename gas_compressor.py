@@ -15,34 +15,6 @@ os.getcwd()
 os.chdir('/home/siddharth/Downloads/Dataset/P_projects/Compressor data')
 
 
-# =============================================================================
-# # reading dataset
-# start_red = datetime.now()
-# print("Dataset reading starts")
-# 
-# df  = pd.read_excel('30k_records.xlsx') # dataset reading ..
-# 
-# print("Dataset reading STOPS")
-# stop_red = datetime.now()
-# 
-# print("Dataset reading time "+str(stop_red-start_red))
-# 
-# # removing unnecessary columns
-# df = df.drop(['prop_th_dcy','prop_tq_dcy','hull_dcy','gt_turb_dcy','output_class'],axis = 1)
-# 
-# 
-# #saving dateset in the pickel file
-# outfile = open('dataset_pkl_file','wb')   #creates file even if it's not there
-# pickle.dump(df,outfile)
-# outfile.close()
-# =============================================================================
-
-# =============================================================================
-# #reading datset from the pickel file
-# infile = open('dataset_pkl_file','rb')
-# df = pickle.load(infile)
-# infile.close()
-# =============================================================================
 
 #reading datset from the pickel file
 with open('dataset_pkl_file','rb') as f:
@@ -151,17 +123,13 @@ loss = tf.reduce_mean(\
                       tf.nn.softmax_cross_entropy_with_logits \
                       ( labels = Y_ph,logits=output_layer) )
 
-#l1_regularizer = tf.contrib.layers.l1_regularizer(0.000005)
+
 
 weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-#regularization_penalty = tf.contrib.layers.apply_regularization(\
-#                           l1_regularizer, weight_not_bias)
 
-#l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
-#                           if 'b' not in v.name ]) * 0.001
 
 regularized_loss = loss #+ regularization_penalty 
 
@@ -186,33 +154,7 @@ batch_size = 100
 
 model_start = datetime.now()
 
-# =============================================================================
-# =============================================================================
-#  Random selection of training examples
-# =============================================================================
-# with tf.Session() as sess:
-#     
-#     sess.run(init)
-#     
-#     for epoch in range(num_epochs):
-#         
-#         no_batches = len(scaled_data_X_train_s) // batch_size
-#         
-#         for step in range(no_batches):
-#                     
-#             rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
-# 
-#             feed = {X_ph:scaled_data_X_train_s[rand_ind].astype(np.float32), 
-#                     Y_ph:y_train_s[rand_ind].toarray().astype(np.float32) }   
-# 
-#             sess.run(train,feed_dict = feed)
-#             
-#         training_loss = regularized_loss.eval(feed_dict=feed)   
-#         
-#         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
-#     
-#     saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
-# =============================================================================
+
 
 # Batch feeding of training examples
 with tf.Session() as sess:
@@ -287,3 +229,70 @@ from sklearn.metrics import accuracy_score
 accuracy_score(y_test_class_s,y_test_result_class_s)
 
 
+
+# =============================================================================
+# # reading dataset
+# start_red = datetime.now()
+# print("Dataset reading starts")
+# 
+# df  = pd.read_excel('30k_records.xlsx') # dataset reading ..
+# 
+# print("Dataset reading STOPS")
+# stop_red = datetime.now()
+# 
+# print("Dataset reading time "+str(stop_red-start_red))
+# 
+# # removing unnecessary columns
+# df = df.drop(['prop_th_dcy','prop_tq_dcy','hull_dcy','gt_turb_dcy','output_class'],axis = 1)
+# 
+# 
+# #saving dateset in the pickel file
+# outfile = open('dataset_pkl_file','wb')   #creates file even if it's not there
+# pickle.dump(df,outfile)
+# outfile.close()
+# =============================================================================
+
+# =============================================================================
+# #reading datset from the pickel file
+# infile = open('dataset_pkl_file','rb')
+# df = pickle.load(infile)
+# infile.close()
+# =============================================================================
+
+
+
+#l1_regularizer = tf.contrib.layers.l1_regularizer(0.000005)
+
+#regularization_penalty = tf.contrib.layers.apply_regularization(\
+#                           l1_regularizer, weight_not_bias)
+
+#l2_regularizer = tf.add_n([ tf.nn.l2_loss(v) for v in weights \
+#                           if 'b' not in v.name ]) * 0.001
+
+# =============================================================================
+# =============================================================================
+#  Random selection of training examples
+# =============================================================================
+# with tf.Session() as sess:
+#     
+#     sess.run(init)
+#     
+#     for epoch in range(num_epochs):
+#         
+#         no_batches = len(scaled_data_X_train_s) // batch_size
+#         
+#         for step in range(no_batches):
+#                     
+#             rand_ind = np.random.randint(len(scaled_data_X_train_s),size=batch_size)
+# 
+#             feed = {X_ph:scaled_data_X_train_s[rand_ind].astype(np.float32), 
+#                     Y_ph:y_train_s[rand_ind].toarray().astype(np.float32) }   
+# 
+#             sess.run(train,feed_dict = feed)
+#             
+#         training_loss = regularized_loss.eval(feed_dict=feed)   
+#         
+#         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
+#     
+#     saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
+# =============================================================================
