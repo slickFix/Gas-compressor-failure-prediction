@@ -123,7 +123,7 @@ weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
-loss_l2 = 0.0001*tf.add_n([tf.nn.l2_loss(v) for v in weight_not_bias])
+loss_l2 = 0.000001*tf.add_n([tf.nn.l2_loss(v) for v in weight_not_bias])
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits \
                          ( labels = Y_ph,logits=output_layer) +\
@@ -146,7 +146,7 @@ saver = tf.train.Saver()
 
 # Training tensoflow model
 
-num_epochs = 20
+num_epochs = 50
 batch_size = 100
 
 model_start = datetime.now()
