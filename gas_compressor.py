@@ -119,19 +119,16 @@ output_layer =tf.add(tf.matmul(hid_layer3, w4),b4)
 
 # loss function
 
-loss = tf.reduce_mean(\
-                      tf.nn.softmax_cross_entropy_with_logits \
-                      ( labels = Y_ph,logits=output_layer) )
-
-
-
 weights = tf.trainable_variables() # all vars of the graph
 
 weight_not_bias = [ v for v in weights if 'b' not in v.name ]
 
+loss_l2 = 0.0001*tf.add_n([tf.nn.l2_loss(v) for v in weight_not_bias])
 
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits \
+                         ( labels = Y_ph,logits=output_layer) +\
+                           loss_l2 )
 
-regularized_loss = loss #+ regularization_penalty 
 
 # optimizer
 
@@ -139,7 +136,7 @@ optimizer = tf.train.AdamOptimizer(learning_rate)
 
 # defining the train variable
 
-train = optimizer.minimize(regularized_loss)
+train = optimizer.minimize(loss)
 
 # initialising the variables
 
@@ -182,7 +179,7 @@ with tf.Session() as sess:
         feed_loss = {X_ph: scaled_data_X_train_s.astype(np.float32),
                      Y_ph: y_train_s.toarray().astype(np.float32)}
         
-        training_loss = regularized_loss.eval(feed_dict=feed_loss)   
+        training_loss = loss.eval(feed_dict=feed_loss)   
         
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
     
