@@ -182,8 +182,16 @@ with tf.Session() as sess:
         training_loss = loss.eval(feed_dict=feed_loss)   
         
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
-    
-    saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
+        
+        if epoch == 0:
+            past_training_loss = training_loss
+            continue
+        
+        elif training_loss < past_training_loss:# if new loss is less than past loss "save new model parameters"            
+            saver.save(sess, "./model_ckpt1/gas_compressor.ckpt")
+            print(f'saving model for epoch : {epoch}')
+            past_training_loss = training_loss
+
 
 model_stop = datetime.now()
 
