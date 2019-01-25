@@ -237,7 +237,10 @@ with tf.Session() as sess:
 
             sess.run(train,feed_dict = feed)
             
-        training_loss = regularized_loss.eval(feed_dict=feed)   
+        feed_loss = {X_ph: scaled_data_X_train_s.astype(np.float32),
+                     Y_ph: y_train_s.toarray().astype(np.float32)}
+        
+        training_loss = regularized_loss.eval(feed_dict=feed_loss)   
         
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
     
