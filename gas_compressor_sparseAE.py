@@ -49,4 +49,49 @@ from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 X_train_scaled_s = sc.fit_transform(X_train_s)
 
+# =============================================================================
+# tensorflow code
+# =============================================================================
+
+
+# reset tensorflow graph
+tf.reset_default_graph()
+
+
+# defining parameters
+input_feat = 25
+hidden1_nodes = 50
+hidden2_nodes = 100
+hidden3_nodes = 50
+output_feat = 1
+
+learning_rate = 0.001
+
+# defining activation function
+act_func = tf.nn.relu
+
+# defining placeholder
+x_ph = tf.placeholder(tf.float32,[None,input_feat],'x_ph')
+y_ph = tf.placeholder(tf.float32,[None,output_feat],'y_ph')
+
+# defining variable initializer
+var_init = tf.variance_scaling_initializer()
+
+# defining weights and bias
+W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
+W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
+W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
+W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+
+W_AE = tf.Variable(var_init([hidden1_nodes,input_feat]),dtype=tf.float32,name='w_ae')
+
+b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
+b2 = tf.Variable(tf.zeros(hidden1_nodes),name='b2')
+b3 = tf.Variable(tf.zeros(hidden1_nodes),name='b3')
+b4 = tf.Variable(tf.zeros(hidden1_nodes),name='b4')
+
+B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
+
+
+
 
