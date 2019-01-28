@@ -188,7 +188,7 @@ with tf.Session() as sess:
             continue
         
         elif training_loss < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-            saver.save(sess, "./model_acc_97.+/gas_compressor.ckpt")
+            saver.save(sess, "./model1/gas_compressor.ckpt")
             print(f'saving model for epoch : {epoch}')
             past_training_loss = training_loss
 
@@ -209,7 +209,7 @@ scaled_data_X_test_s = MinMaxScaler().fit_transform(X_test_s)
 
 with tf.Session() as sess:
     
-    saver.restore(sess,"./model_acc_97.+/gas_compressor.ckpt")
+    saver.restore(sess,"./model1/gas_compressor.ckpt")
     
     
     feed = {X_ph:scaled_data_X_test_s.astype(np.float32),  
