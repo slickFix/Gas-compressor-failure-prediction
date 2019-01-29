@@ -56,7 +56,8 @@ X_train_s, X_test_s, y_train_s, y_test_s = \
 #scaling the data
 
 from sklearn.preprocessing import MinMaxScaler,StandardScaler,Normalizer
-scaled_data_X_train_s= StandardScaler().fit_transform(X_train_s)
+sc = StandardScaler().fit(X_train_s)
+scaled_data_X_train_s= sc.transform(X_train_s)
 
     
 # =============================================================================
@@ -200,8 +201,7 @@ print("Model trainging time "+str(model_stop-model_start))
 
 #scaling the test data
 
-from sklearn.preprocessing import MinMaxScaler,StandardScaler,Normalizer
-scaled_data_X_test_s = StandardScaler().fit_transform(X_test_s)
+scaled_data_X_test_s = sc.transform(X_test_s)
 
 
 # Evaluating output
