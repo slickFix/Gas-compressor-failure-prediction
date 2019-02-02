@@ -205,17 +205,20 @@ scaled_data_X_test_s = sc.transform(X_test_s)
 
 
 # Evaluating output
-
-
 with tf.Session() as sess:
+    
+    writer_before_restore = tf.summary.FileWriter("./before_restore",sess.graph)
     
     saver.restore(sess,"./model1/gas_compressor.ckpt")
     
+    writer_after_restore = tf.summary.FileWriter("./after_restore",sess.graph)
     
     feed = {X_ph:scaled_data_X_test_s.astype(np.float32),  
             Y_ph:y_test_s.toarray().astype(np.float32) }
     
     results = output_layer.eval(feed_dict=feed)
+    
+    writer_after_result = tf.summary.FileWriter("./after_result",sess.graph)
     
     
 # Getting 1 D array of y_test
