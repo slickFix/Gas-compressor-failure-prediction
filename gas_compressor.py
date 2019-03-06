@@ -150,9 +150,13 @@ saver = tf.train.Saver()
 num_epochs = 50
 batch_size = 100
 
+# Setting tf SEED
+tf.random.set_random_seed(101)
+
+
+
+
 model_start = datetime.now()
-
-
 
 # Batch feeding of training examples
 with tf.Session() as sess:
@@ -162,6 +166,8 @@ with tf.Session() as sess:
     for epoch in range(num_epochs):
         
         no_batches = len(scaled_data_X_train_s) // batch_size
+        
+        epoch_cost = 0
         
         for step in range(no_batches+1):
                     
@@ -175,14 +181,20 @@ with tf.Session() as sess:
                 feed[X_ph] = scaled_data_X_train_s[step*batch_size : ].astype(np.float32)
                 feed[Y_ph] = y_train_s[step*batch_size: ].toarray().astype(np.float32) 
 
-            sess.run(train,feed_dict = feed)
+            _ , mini_batch_cost = sess.run([train,loss],feed_dict = feed)
             
+            epoch_cost += mini_batch_cost/no_batches
+            
+        
+        
+        
         feed_loss = {X_ph: scaled_data_X_train_s.astype(np.float32),
                      Y_ph: y_train_s.toarray().astype(np.float32)}
         
         training_loss = loss.eval(feed_dict=feed_loss)   
         
         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
+        print("Epoch {} Complete. Training epoch_cost: {}".format(epoch,epoch_cost))
         
         if epoch == 0:
             past_training_loss = training_loss
@@ -192,49 +204,71 @@ with tf.Session() as sess:
             saver.save(sess, "./model1/gas_compressor.ckpt")
             print(f'saving model for epoch : {epoch}')
             past_training_loss = training_loss
-
-
-model_stop = datetime.now()
-
-print("Model trainging time "+str(model_stop-model_start))
-
-
-#scaling the test data
-
-scaled_data_X_test_s = sc.transform(X_test_s)
-
-
-# Evaluating output
-with tf.Session() as sess:
-    
-    writer_before_restore = tf.summary.FileWriter("./before_restore",sess.graph)
+        
     
     saver.restore(sess,"./model1/gas_compressor.ckpt")
     
-    writer_after_restore = tf.summary.FileWriter("./after_restore",sess.graph)
-    
-    feed = {X_ph:scaled_data_X_test_s.astype(np.float32),  
-            Y_ph:y_test_s.toarray().astype(np.float32) }
-    
-    results = output_layer.eval(feed_dict=feed)
-    
-    writer_after_result = tf.summary.FileWriter("./after_result",sess.graph)
+    s = "Training completed"        
+    print(s.center(50,'-'))
     
     
-# Getting 1 D array of y_test
+    model_stop = datetime.now()
+    print("Model trainging time "+str(model_stop-model_start))
+    
+    
+    correct_pre = tf.equal(tf.math.argmax(output_layer,axis=1),tf.math.argmax(Y_ph,axis=1))
+    acc = tf.reduce_mean(tf.cast(correct_pre,'float'))
+    
+    print("Train acc: ",acc.eval({X_ph: scaled_data_X_train_s.astype(np.float32),
+                                  Y_ph: y_train_s.toarray().astype(np.float32)}))
+    
+    #scaling x_test
+    print("Test acc: ",acc.eval({X_ph:sc.transform(X_test_s).astype(np.float32),
+                                 Y_ph:y_test_s.toarray().astype(np.float32)}))
+    
+    #writer = tf.summary.FileWriter('./accuracy_check',sess.graph)
+    #writer.close()
 
-y_test_class_s = [i.argmax() for i in y_test_s]
 
 
-# Getting 1 D array of y_pred
-
-y_test_result_class_s = [i.argmax() for i in results]
 
 
-# Checking the accuracy score
-from sklearn.metrics import accuracy_score
 
-accuracy_score(y_test_class_s,y_test_result_class_s)
+# =============================================================================
+# #scaling the test data
+# 
+# scaled_data_X_test_s = sc.transform(X_test_s)
+# 
+# 
+# # Evaluating output
+# with tf.Session() as sess:
+#     
+#     
+#     saver.restore(sess,"./model1/gas_compressor.ckpt")
+#     
+#     
+#     feed = {X_ph:scaled_data_X_test_s.astype(np.float32),  
+#             Y_ph:y_test_s.toarray().astype(np.float32) }
+#     
+#     results = output_layer.eval(feed_dict=feed)
+#     
+#     
+#     
+# # Getting 1 D array of y_test
+# 
+# y_test_class_s = [i.argmax() for i in y_test_s]
+# 
+# 
+# # Getting 1 D array of y_pred
+# 
+# y_test_result_class_s = [i.argmax() for i in results]
+# 
+# 
+# # Checking the accuracy score
+# from sklearn.metrics import accuracy_score
+# 
+# accuracy_score(y_test_class_s,y_test_result_class_s)
+# =============================================================================
 
 
 
