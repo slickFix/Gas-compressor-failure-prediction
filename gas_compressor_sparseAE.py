@@ -110,9 +110,19 @@ def fwd_propagation(x_ph,parameters):
     
     return output_layer,x_hat,hid_layer1
     
+def compute_cost_fc(logits,y_ph,reg_lambda):
+    
+    loss = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=y_ph)
+    
+    weights = tf.trainable_variables()
+    weights_without_bias = [v for v in weights if 'b' not in v.name and 'ae' not in v.name] 
+    
+    l2_loss = reg_lambda*tf.add_n([tf.nn.l2_loss(v) for v in weights_without_bias])
+    
+    return tf.reduce_mean(loss+l2_loss)
     
     
-def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,n_epochs = 50):
+def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,reg_lambda = 1e-6,n_epochs = 50):
     
     # reset default graph
     tf.reset_default_graph()
@@ -129,7 +139,11 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,n_ep
     parameters = initialise_parameter(n_x,n_y)
     
     # forward propagation
-    logits,x_hat = fwd_propagation(x_ph,parameters)
+    logits,x_hat,hid_layer1 = fwd_propagation(x_ph,parameters)
+    
+    # cost calculation
+    cost_fc = compute_cost_fc(logits,y_ph,reg_lambda)
+    cost_ae = compute_cost_ae(x_hat,x_ph)
     
 
 if __name__ == '__main__':
