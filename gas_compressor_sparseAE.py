@@ -13,6 +13,7 @@ import tensorflow as tf
 import pickle
 import os
 
+from datetime import datetime
 
 # Changing CWD to the dataset (pickle) location
 os.getcwd()
@@ -128,52 +129,66 @@ def initialise_parameter_ae_all(n_x,n_y):
 def fwd_propagation_ae_all(x_ph,parameters):
     ''' all layers of the FC is trained by ae '''
     
-    W1 = parameters['W1']
-    W2 = parameters['W2'] 
-    W3 = parameters['W3'] 
-    W4 = parameters['W4']  
-    W_AE = parameters['W_AE'] 
-    b1 = parameters['b1']  
-    b2 = parameters['b2']  
-    b3 = parameters['b3']  
-    b4 = parameters['b4'] 
-    B_AE = parameters['B_AE'] 
+    with tf.variable_scope('weights'):
+        W1 = parameters['W1']
+        W2 = parameters['W2'] 
+        W3 = parameters['W3'] 
+        W4 = parameters['W4']  
+        W_AE = parameters['W_AE'] 
+    
+    with tf.variable_scope('bias'):
+        b1 = parameters['b1']  
+        b2 = parameters['b2']  
+        b3 = parameters['b3']  
+        b4 = parameters['b4'] 
+        B_AE = parameters['B_AE']  
     
     act_fn = tf.nn.relu
     
-    hid_layer1 = act_fn(tf.add(tf.matmul(x_ph,W1),b1))
-    hid_layer2 = act_fn(tf.add(tf.matmul(hid_layer1,W2),b2))
-    hid_layer3 = act_fn(tf.add(tf.matmul(hid_layer2,W3),b3))
+    with tf.variable_scope('layer_1'):
+        hid_layer1 = act_fn(tf.add(tf.matmul(x_ph,W1),b1))
+    with tf.variable_scope('layer_2'):
+        hid_layer2 = act_fn(tf.add(tf.matmul(hid_layer1,W2),b2))
+    with tf.variable_scope('layer_3'):
+        hid_layer3 = act_fn(tf.add(tf.matmul(hid_layer2,W3),b3))
+        
+    with tf.variable_scope('output_layer'):
+        output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
     
-    output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
-    
-    x_hat = tf.nn.sigmoid(tf.add(tf.matmul(hid_layer1,W_AE),B_AE))
+    with tf.variable_scope('x_hat_layer'):
+        x_hat = tf.nn.sigmoid(tf.add(tf.matmul(hid_layer3,W_AE),B_AE))
     
     return output_layer,x_hat,hid_layer1,hid_layer2,hid_layer3
 
 
 def fwd_propagation(x_ph,parameters):
     
-    W1 = parameters['W1']
-    W2 = parameters['W2'] 
-    W3 = parameters['W3'] 
-    W4 = parameters['W4']  
-    W_AE = parameters['W_AE'] 
-    b1 = parameters['b1']  
-    b2 = parameters['b2']  
-    b3 = parameters['b3']  
-    b4 = parameters['b4'] 
-    B_AE = parameters['B_AE'] 
+    with tf.variable_scope('weights'):
+        W1 = parameters['W1']
+        W2 = parameters['W2'] 
+        W3 = parameters['W3'] 
+        W4 = parameters['W4']  
+        W_AE = parameters['W_AE'] 
+    
+    with tf.variable_scope('bias'):
+        b1 = parameters['b1']  
+        b2 = parameters['b2']  
+        b3 = parameters['b3']  
+        b4 = parameters['b4'] 
+        B_AE = parameters['B_AE'] 
     
     act_fn = tf.nn.relu
     
-    hid_layer1 = act_fn(tf.add(tf.matmul(x_ph,W1),b1))
-    hid_layer2 = act_fn(tf.add(tf.matmul(hid_layer1,W2),b2))
-    hid_layer3 = act_fn(tf.add(tf.matmul(hid_layer2,W3),b3))
+    with tf.variable_scope('layers'):
+        hid_layer1 = act_fn(tf.add(tf.matmul(x_ph,W1),b1))
+        hid_layer2 = act_fn(tf.add(tf.matmul(hid_layer1,W2),b2))
+        hid_layer3 = act_fn(tf.add(tf.matmul(hid_layer2,W3),b3))
     
-    output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
+    with tf.variable_scope('output_layer'):
+        output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
     
-    x_hat = tf.nn.sigmoid(tf.add(tf.matmul(hid_layer1,W_AE),B_AE))
+    with tf.variable_scope('x_hat_layer'):
+        x_hat = tf.nn.sigmoid(tf.add(tf.matmul(hid_layer1,W_AE),B_AE))
     
     return output_layer,x_hat,hid_layer1
 
@@ -329,9 +344,9 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
             if epoch == 0:
                 past_training_loss = epoch_cost
                 continue
-        
+            
             elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-                saver.save(sess, "./model_ae_fc_all/gas_compressor.ckpt")
+                saver.save(sess, "./model_ae_fc_all_1/ae_99.5_fc",write_meta_graph=False,global_step=epoch)
                 print(f'saving model for epoch : {epoch}')
                 past_training_loss = epoch_cost
             
@@ -351,6 +366,9 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
         feed_test[y_ph] = y_test_s.astype(np.float32)
         
         print("Test accuracy of the AE_FC model is : ", acc.eval(feed_test))
+        
+        writer = tf.summary.FileWriter('./tensorboard_ae_fc',sess.graph)
+        writer.close()
         
     
 
@@ -379,8 +397,10 @@ if __name__ == '__main__':
     X_train_scaled_s = sc.transform(X_train_s)
     
     # TRAINING TF MODEL
-    #model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
-    
+    training_start = datetime.now()
+    model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
+    training_stop = datetime.now()
+    print('Training time for the AE+FC model: ',str(training_stop-training_start))
 # =============================================================================
 #     learning_rate = 1e-3
 #     rho=0.1
