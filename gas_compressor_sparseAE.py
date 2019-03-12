@@ -66,9 +66,9 @@ def initialise_parameter(n_x,n_y):
     W_AE = tf.Variable(var_init([hidden1_nodes,input_feat]),dtype=tf.float32,name='w_ae')
     
     b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
-    b2 = tf.Variable(tf.zeros(hidden1_nodes),name='b2')
-    b3 = tf.Variable(tf.zeros(hidden1_nodes),name='b3')
-    b4 = tf.Variable(tf.zeros(hidden1_nodes),name='b4')
+    b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
+    b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
+    b4 = tf.Variable(tf.zeros(output_feat),name='b4')
     
     B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
 
@@ -234,11 +234,13 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
         correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
         acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
         
+        feed_train ={}
         feed_train[x_ph] = X_train_scaled_s.astype(np.float32)
         feed_train[y_ph] = y_train_s.astype(np.float32)
         
         print("Training accuracy of the AE_FC model is : ",acc.eval(feed_train))
         
+        feed_test = {}
         X_test_scaled_s = sc.transform(X_test_s)
         feed_test[x_ph] = X_test_scaled_s.astype(np.float32)
         feed_test[y_ph] = y_test_s.astype(np.float32)
