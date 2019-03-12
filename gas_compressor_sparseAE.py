@@ -120,9 +120,27 @@ def compute_cost_fc(logits,y_ph,reg_lambda):
     l2_loss = reg_lambda*tf.add_n([tf.nn.l2_loss(v) for v in weights_without_bias])
     
     return tf.reduce_mean(loss+l2_loss)
+
+def kl_divergence(p,p_hat):
+    return p*tf.log(p)-p*tf.log(p_hat)+(1-p)*tf.log(1-p)-(1-p)*tf.log(1-p_hat)
+
+
+def compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta):
     
+    diff = x_hat-x_ph
     
-def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,reg_lambda = 1e-6,n_epochs = 50):
+    p_hat = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)    
+    kl = kl_divergence(rho,p_hat)
+    
+    W1 = parameters['W1']
+    W_AE = parameters['W_AE']
+    l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W_AE))
+    
+    loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+beta*tf.reduce_sum(kl)+l2_loss
+    
+    return loss
+       
+def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,rho=0.1,beta=3,reg_lambda = 1e-6,n_epochs = 50,batch_size=100):
     
     # reset default graph
     tf.reset_default_graph()
@@ -143,7 +161,17 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,reg_
     
     # cost calculation
     cost_fc = compute_cost_fc(logits,y_ph,reg_lambda)
-    cost_ae = compute_cost_ae(x_hat,x_ph)
+    cost_ae = compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta)
+    
+    # optimizers
+    optimizer_fc = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_fc)
+    optimizer_ae = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_ae)
+    
+    init = tf.global_variables_initializer()
+    
+    with tf.Session() as sess:
+        sess.run(init)
+        
     
 
 if __name__ == '__main__':
