@@ -140,7 +140,24 @@ def compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta):
     
     return loss
        
-def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,rho=0.1,beta=3,reg_lambda = 1e-6,n_epochs = 50,batch_size=100):
+def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,rho=0.1,beta=3,reg_lambda = 1e-6,n_epochs = 50,batch_size=100):
+    ''' 
+    Function for executing the NN model
+    
+    Args:-
+    
+    arg1 : x_train
+    arg2 : y_train
+    arg3 : x_test
+    arg4 : y_test
+    arg5 : sc
+    arg6 : learning rate(default)
+    arg7 : rho(default)
+    arg8 : beta(default)
+    arg9 : reg_lambda(default)
+    arg10 : n_epochs(default)
+    arg11: batch_size(default)
+    '''
     
     # reset default graph
     tf.reset_default_graph()
@@ -148,7 +165,6 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,rho=
     # getting the x and y features
     n_x = X_train_scaled_s.shape[1]
     n_y = y_train_s.shape[1]
-    
     
     # creating placeholders
     x_ph,y_ph = create_placeholder(n_x,n_y)
@@ -158,6 +174,10 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,rho=
     
     # forward propagation
     logits,x_hat,hid_layer1 = fwd_propagation(x_ph,parameters)
+    
+    # cost history saving
+    cost_fc_li = []
+    cost_ae_li = []
     
     # cost calculation
     cost_fc = compute_cost_fc(logits,y_ph,reg_lambda)
@@ -171,6 +191,59 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 1e-3,rho=
     
     with tf.Session() as sess:
         sess.run(init)
+        
+        print('Training the Sparse Auto encoder')
+        for epoch in range(n_epochs):            
+            n_batches = len(X_train_scaled_s)//batch_size
+            epoch_cost = 0
+            for step in range(n_batches+1):
+                feed = {}
+                if step != n_batches:
+                    feed[x_ph] = X_train_scaled_s[step*batch_size:(step+1)*batch_size]
+                else:
+                    feed[x_ph] = X_train_scaled_s[step*batch_size:]
+               
+                _,c_ae = sess.run([optimizer_ae,cost_ae],feed)
+                epoch_cost += c_ae/n_batches
+            
+            cost_ae_li.append(epoch_cost)
+            if (epoch+1)%2 == 0:
+                print("Epoch: ",epoch+1," cost: ",epoch_cost)
+            
+            
+        print('Training FC model with AE feature in the 1st layer')
+        for epoch in range(n_epochs):
+            n_batches = len(X_train_scaled_s) // batch_size
+            epoch_cost = 0 
+            for step in range(n_batches +1):
+                feed = {}
+                if step != n_batches:
+                    feed[x_ph] = X_train_scaled_s[step*batch_size:(step+1)*batch_size]
+                    feed[y_ph] = y_train_s[step*batch_size:(step+1)*batch_size]
+                else:
+                    feed[x_ph] = X_train_scaled_s[step*batch_size:]
+                    feed[y_ph] = y_train_s[step*batch_size:]
+                
+                _, c_fc = sess.run([optimizer_fc,cost_fc],feed)
+                epoch_cost += c_fc/n_batches
+            
+            cost_fc_li.append(epoch_cost)
+            if (epoch+1)%2 == 0:
+                print("Epoch: ",epoch+1," cost: ",epoch_cost)
+        
+        correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
+        acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
+        
+        feed_train[x_ph] = X_train_scaled_s.astype(np.float32)
+        feed_train[y_ph] = y_train_s.astype(np.float32)
+        
+        print("Training accuracy of the AE_FC model is : ",acc.eval(feed_train))
+        
+        X_test_scaled_s = sc.transform(X_test_s)
+        feed_test[x_ph] = X_test_scaled_s.astype(np.float32)
+        feed_test[y_ph] = y_test_s.astype(np.float32)
+        
+        print("Test accuracy of the AE_FC model is : ", acc.eval(feed_test))
         
     
 
@@ -199,7 +272,7 @@ if __name__ == '__main__':
     X_train_scaled_s = sc.transform(X_train_s)
     
     
-    model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,learning_rate = 0.001,n_epochs = 50)
+    model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
 
     
 
