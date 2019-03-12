@@ -326,14 +326,16 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
             if (epoch+1)%2 == 0:
                 print("Epoch: ",epoch+1," cost: ",epoch_cost)
                 
-            if epoch == 0:
-                past_training_loss = epoch_cost
-                continue
-        
-            elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-                saver.save(sess, "./model_ae_fc_all/gas_compressor.ckpt")
-                print(f'saving model for epoch : {epoch}')
-                past_training_loss = epoch_cost
+# =============================================================================
+#             if epoch == 0:
+#                 past_training_loss = epoch_cost
+#                 continue
+#         
+#             elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
+#                 saver.save(sess, "./model_ae_fc_all/gas_compressor.ckpt")
+#                 print(f'saving model for epoch : {epoch}')
+#                 past_training_loss = epoch_cost
+# =============================================================================
             
         
         correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
