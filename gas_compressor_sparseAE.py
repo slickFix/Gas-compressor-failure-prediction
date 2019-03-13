@@ -465,8 +465,8 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
                 continue
             
             elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-                saver.save(sess, "./model_ae_fc_1_2/ae_99.8_fc",write_meta_graph=False,global_step=epoch)
-                print(f'saving model for epoch : {epoch}')
+                saver.save(sess, "./model_ae_fc_1_2/ae_99.8_fc",write_meta_graph=False,global_step=epoch+1)
+                print(f'saving model for epoch : {epoch+1}')
                 past_training_loss = epoch_cost
             
         
