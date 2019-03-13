@@ -41,8 +41,9 @@ def get_data():
 
 def create_placeholder(n_x,n_y):
     
-    x_ph = tf.placeholder(tf.float32,[None,n_x],name='X_ph')    
-    y_ph = tf.placeholder(tf.float32,[None,n_y],name='Y_ph')
+    with tf.variable_scope('Placeholders'):
+        x_ph = tf.placeholder(tf.float32,[None,n_x],name='X_ph')    
+        y_ph = tf.placeholder(tf.float32,[None,n_y],name='Y_ph')
     
     return x_ph,y_ph
 
@@ -210,6 +211,7 @@ def fwd_propagation_ae_1_2(x_ph,parameters):
     with tf.variable_scope('output_layer'):
         output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
     
+
     with tf.variable_scope('decoder_layer_1'):
         decoder_layer_1 = tf.add(tf.matmul(hid_layer2,W_AE_1),B_AE_1)
         
@@ -287,38 +289,42 @@ def fwd_propagation(x_ph,parameters):
 
 def compute_cost_fc(logits,y_ph,reg_lambda):
     
-    loss = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=y_ph)
+    with tf.variable_scope('FC_loss'):
+        loss = tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels=y_ph)
+        
+        weights = tf.trainable_variables()
+        weights_without_bias = [v for v in weights if 'b' not in v.name and 'ae' not in v.name] 
+        
+        l2_loss = reg_lambda*tf.add_n([tf.nn.l2_loss(v) for v in weights_without_bias])
+        
+        ret_loss = tf.reduce_mean(loss+l2_loss)
     
-    weights = tf.trainable_variables()
-    weights_without_bias = [v for v in weights if 'b' not in v.name and 'ae' not in v.name] 
-    
-    l2_loss = reg_lambda*tf.add_n([tf.nn.l2_loss(v) for v in weights_without_bias])
-    
-    return tf.reduce_mean(loss+l2_loss)
+    return ret_loss
 
 def kl_divergence(p,p_hat):
     return p*tf.log(p)-p*tf.log(p_hat)+(1-p)*tf.log(1-p)-(1-p)*tf.log(1-p_hat)
 
 def compute_cost_ae_1_2(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,rho,beta):
     
-    diff = x_hat-x_ph
-    
-    p_hat1 = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)
-    p_hat2 = tf.reduce_mean(tf.clip_by_value(hid_layer2,1e-10,1.0,name='clipper'),axis = 0)    
-    
-    kl1 = kl_divergence(rho,p_hat1)
-    kl2 = kl_divergence(rho,p_hat2)
-    
-    kl_loss = beta*(tf.reduce_sum(kl1)+tf.reduce_sum(kl2))
-    
-    W1 = parameters['W1']
-    W2 = parameters['W2'] 
-    W3 = parameters['W3']
-    W_AE_1 = parameters['W_AE_1']
-    W_AE = parameters['W_AE']
-    l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W2)+tf.nn.l2_loss(W3)+tf.nn.l2_loss(W_AE_1)+tf.nn.l2_loss(W_AE))
-    
-    loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+kl_loss+l2_loss
+    with tf.variable_scope('AE_loss'):
+        diff = x_hat-x_ph
+        
+        p_hat1 = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)
+        p_hat2 = tf.reduce_mean(tf.clip_by_value(hid_layer2,1e-10,1.0,name='clipper'),axis = 0)    
+        
+        kl1 = kl_divergence(rho,p_hat1)
+        kl2 = kl_divergence(rho,p_hat2)
+        
+        kl_loss = beta*(tf.reduce_sum(kl1)+tf.reduce_sum(kl2))
+        
+        W1 = parameters['W1']
+        W2 = parameters['W2'] 
+        W3 = parameters['W3']
+        W_AE_1 = parameters['W_AE_1']
+        W_AE = parameters['W_AE']
+        l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W2)+tf.nn.l2_loss(W3)+tf.nn.l2_loss(W_AE_1)+tf.nn.l2_loss(W_AE))
+        
+        loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+kl_loss+l2_loss
     
     return loss
 
@@ -460,18 +466,20 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
             if (epoch+1)%2 == 0:
                 print("Epoch: ",epoch+1," cost: ",epoch_cost)
                 
-            if epoch == 0:
-                past_training_loss = epoch_cost
-                continue
+# =============================================================================
+#             if epoch == 0:
+#                 past_training_loss = epoch_cost
+#                 continue
+#             
+#             elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
+#                 saver.save(sess, "./model_ae_fc_1_2/ae_99.8_fc",write_meta_graph=False,global_step=epoch+1)
+#                 print(f'saving model for epoch : {epoch+1}')
+#                 past_training_loss = epoch_cost
+# =============================================================================
             
-            elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-                saver.save(sess, "./model_ae_fc_1_2/ae_99.8_fc",write_meta_graph=False,global_step=epoch+1)
-                print(f'saving model for epoch : {epoch+1}')
-                past_training_loss = epoch_cost
-            
-        
-        correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
-        acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
+        with tf.variable_scope('accuracy_cal'):
+            correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
+            acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
         
         feed_train ={}
         feed_train[x_ph] = X_train_scaled_s.astype(np.float32)
