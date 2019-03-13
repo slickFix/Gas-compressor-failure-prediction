@@ -499,7 +499,6 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
 #         writer.close()
 # =============================================================================
         
-    
 
 if __name__ == '__main__':
     
@@ -528,51 +527,48 @@ if __name__ == '__main__':
     # TRAINING TF MODEL
     training_start = datetime.now()
     
-    model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
+    #model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
     
     training_stop = datetime.now()
     print('Training time for the AE+FC model: ',str(training_stop-training_start))
     
     
-# =============================================================================
-#     # model evaluation on 40 % not seen dataset
-#     
-#     x_eval = df_not_s.iloc[:,:-1]
-#     y_eval = df_not_s.iloc[:,-1]
-#     
-#     # label encoding the output variable
-#     le_eval = LabelEncoder()
-#     y_eval = le_eval.fit_transform(y_eval)
-#     
-#     # one-hot encoding of the dependent variable
-#     y_eval = OneHotEncoder().fit_transform(y_eval.reshape(-1,1)) # it's a scipy.sparse.csr.csr_mat
-#     y_eval = y_eval.toarray() # converting to ndarray
-# 
-#     # accuracy on eval dataset
-#     
-#     with tf.Session() as sess:
-#         saver = tf.train.import_meta_graph('./model_ae_fc_1_2/ae_99.8_fc-45.meta')
-#         saver.restore(sess,tf.train.latest_checkpoint('./model_ae_fc_1_2/'))
-#         
-#         graph = tf.get_default_graph()
-#         
-#         y_ph = graph.get_tensor_by_name('Placeholders/Y_ph:0')
-#         x_ph = graph.get_tensor_by_name('Placeholders/X_ph:0')
-#         logits = graph.get_tensor_by_name('output_layer/Add:0')
-#         
-#         correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
-#         acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
-#         
-#         feed_eval = {}
-#         X_eval_scaled = sc.transform(x_eval)  #scaling the eval set
-#         feed_eval[x_ph] = X_eval_scaled.astype(np.float32)
-#         feed_eval[y_ph] = y_eval.astype(np.float32)
-#         
-#         print("Accuracy for the 40% unseen data is : ", acc.eval(feed_eval))
-# =============================================================================
+    # model evaluation on 40 % not seen dataset
+    
+    x_eval = df_not_s.iloc[:,:-1]
+    y_eval = df_not_s.iloc[:,-1]
+    
+    # label encoding the output variable
+    le_eval = LabelEncoder()
+    y_eval = le_eval.fit_transform(y_eval)
+    
+    # one-hot encoding of the dependent variable
+    y_eval = OneHotEncoder().fit_transform(y_eval.reshape(-1,1)) # it's a scipy.sparse.csr.csr_mat
+    y_eval = y_eval.toarray() # converting to ndarray
+
+    # accuracy on eval dataset
+    
+    with tf.Session() as sess:
+        saver = tf.train.import_meta_graph('./model_ae_fc_1_2/ae_99.8_fc-46.meta')
+        saver.restore(sess,'./model_ae_fc_1_2/ae_99.8_fc-46')
+        
+        graph = tf.get_default_graph()
+        
+        y_ph = graph.get_tensor_by_name('Placeholders/Y_ph:0')
+        x_ph = graph.get_tensor_by_name('Placeholders/X_ph:0')
+        logits = graph.get_tensor_by_name('output_layer/Add:0')
+        
+        correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
+        acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
+        
+        feed_eval = {}
+        X_eval_scaled = sc.transform(x_eval)  #scaling the eval set
+        feed_eval[x_ph] = X_eval_scaled.astype(np.float32)
+        feed_eval[y_ph] = y_eval.astype(np.float32)
+        
+        print("Accuracy for the 40% unseen data is : ", acc.eval(feed_eval))
         
         
-    #logits ---> Tensor("output_layer/Add:0", shape=(?, 15), dtype=float32)
     
     
     
