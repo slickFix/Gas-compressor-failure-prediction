@@ -58,20 +58,22 @@ def initialise_parameter(n_x,n_y):
     # defining variable initializer
     var_init = tf.variance_scaling_initializer()
     
-    # defining weights and bias
-    W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
-    W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
-    W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
-    W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+    with tf.variable_scope('weights'):
+        # defining weights and bias
+        W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
+        W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
+        W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
+        W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+        
+        W_AE = tf.Variable(var_init([hidden1_nodes,input_feat]),dtype=tf.float32,name='w_ae')
     
-    W_AE = tf.Variable(var_init([hidden1_nodes,input_feat]),dtype=tf.float32,name='w_ae')
-    
-    b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
-    b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
-    b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
-    b4 = tf.Variable(tf.zeros(output_feat),name='b4')
-    
-    B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
+    with tf.variable_scope('bias'):
+        b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
+        b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
+        b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
+        b4 = tf.Variable(tf.zeros(output_feat),name='b4')
+        
+        B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
 
     parameters = {            
             'W1':W1,
@@ -83,6 +85,55 @@ def initialise_parameter(n_x,n_y):
             'b2':b2,
             'b3':b3,
             'b4':b4,
+            'B_AE':B_AE}
+    return parameters
+
+def initialise_parameter_ae_1_2(n_x,n_y):
+    ''' layer 1 and layer 2 of the FC is trained by ae '''
+    # defining parameters
+    input_feat = n_x
+    hidden1_nodes = 50
+    hidden2_nodes = 100
+    hidden3_nodes = 50
+    output_feat = n_y
+    
+    # defining variable initializer
+    var_init = tf.variance_scaling_initializer()
+    
+    with tf.variable_scope('weights'):
+        # defining weights 
+        W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
+        W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
+        W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
+        W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+    
+        # defining tied weights
+        W_AE_1 = tf.transpose(W2,name='w_ae_1')
+        W_AE = tf.transpose(W1,name='w_ae')
+        
+        
+    with tf.variable_scope('bias'):
+        # defining bias
+        b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
+        b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
+        b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
+        b4 = tf.Variable(tf.zeros(output_feat),name='b4')
+        
+        B_AE_1 = tf.Variable(tf.zeros(hidden1_nodes),name='b_ae_1')
+        B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
+
+    parameters = {            
+            'W1':W1,
+            'W2':W2,
+            'W3':W3,
+            'W4':W4,
+            'W_AE_1':W_AE_1,
+            'W_AE':W_AE,
+            'b1':b1,
+            'b2':b2,
+            'b3':b3,
+            'b4':b4,
+            'B_AE_1':B_AE_1,
             'B_AE':B_AE}
     return parameters
 
@@ -98,20 +149,22 @@ def initialise_parameter_ae_all(n_x,n_y):
     # defining variable initializer
     var_init = tf.variance_scaling_initializer()
     
-    # defining weights and bias
-    W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
-    W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
-    W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
-    W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+    with tf.variable_scope('weights'):
+        # defining weights and bias
+        W1 = tf.Variable(var_init([input_feat,hidden1_nodes]),dtype=tf.float32,name='w1')
+        W2 = tf.Variable(var_init([hidden1_nodes,hidden2_nodes]),dtype=tf.float32,name='w2')
+        W3 = tf.Variable(var_init([hidden2_nodes,hidden3_nodes]),dtype=tf.float32,name='w3')
+        W4 = tf.Variable(var_init([hidden3_nodes,output_feat]),dtype=tf.float32,name='w4')
+        
+        W_AE = tf.Variable(var_init([hidden3_nodes,input_feat]),dtype=tf.float32,name='w_ae')
     
-    W_AE = tf.Variable(var_init([hidden3_nodes,input_feat]),dtype=tf.float32,name='w_ae')
-    
-    b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
-    b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
-    b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
-    b4 = tf.Variable(tf.zeros(output_feat),name='b4')
-    
-    B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
+    with tf.variable_scope('bias'):
+        b1 = tf.Variable(tf.zeros(hidden1_nodes),name='b1')
+        b2 = tf.Variable(tf.zeros(hidden2_nodes),name='b2')
+        b3 = tf.Variable(tf.zeros(hidden3_nodes),name='b3')
+        b4 = tf.Variable(tf.zeros(output_feat),name='b4')
+        
+        B_AE = tf.Variable(tf.zeros(input_feat),name='b_ae')
 
     parameters = {            
             'W1':W1,
@@ -126,22 +179,62 @@ def initialise_parameter_ae_all(n_x,n_y):
             'B_AE':B_AE}
     return parameters
 
+def fwd_propagation_ae_1_2(x_ph,parameters):
+    ''' layer 1 and layer 2 of the FC is trained by ae '''
+    
+    
+    W1 = parameters['W1']
+    W2 = parameters['W2'] 
+    W3 = parameters['W3'] 
+    W4 = parameters['W4']
+    W_AE_1 = parameters['W_AE_1'] 
+    W_AE = parameters['W_AE'] 
+    
+    
+    b1 = parameters['b1']  
+    b2 = parameters['b2']  
+    b3 = parameters['b3']  
+    b4 = parameters['b4'] 
+    B_AE_1 = parameters['B_AE_1'] 
+    B_AE = parameters['B_AE']  
+    
+    act_fn = tf.nn.relu
+    
+    with tf.variable_scope('layer_1'):
+        hid_layer1 = act_fn(tf.add(tf.matmul(x_ph,W1),b1))
+    with tf.variable_scope('layer_2'):
+        hid_layer2 = act_fn(tf.add(tf.matmul(hid_layer1,W2),b2))
+    with tf.variable_scope('layer_3'):
+        hid_layer3 = act_fn(tf.add(tf.matmul(hid_layer2,W3),b3))
+        
+    with tf.variable_scope('output_layer'):
+        output_layer = tf.add(tf.matmul(hid_layer3,W4),b4)
+    
+    with tf.variable_scope('decoder_layer_1'):
+        decoder_layer_1 = tf.add(tf.matmul(hid_layer2,W_AE_1),B_AE_1)
+        
+    with tf.variable_scope('x_hat_layer'):
+        x_hat = tf.nn.sigmoid(tf.add(tf.matmul(decoder_layer_1,W_AE),B_AE))
+    
+    return output_layer,x_hat,hid_layer1,hid_layer2
+
+
 def fwd_propagation_ae_all(x_ph,parameters):
     ''' all layers of the FC is trained by ae '''
     
-    with tf.variable_scope('weights'):
-        W1 = parameters['W1']
-        W2 = parameters['W2'] 
-        W3 = parameters['W3'] 
-        W4 = parameters['W4']  
-        W_AE = parameters['W_AE'] 
     
-    with tf.variable_scope('bias'):
-        b1 = parameters['b1']  
-        b2 = parameters['b2']  
-        b3 = parameters['b3']  
-        b4 = parameters['b4'] 
-        B_AE = parameters['B_AE']  
+    W1 = parameters['W1']
+    W2 = parameters['W2'] 
+    W3 = parameters['W3'] 
+    W4 = parameters['W4']  
+    W_AE = parameters['W_AE'] 
+    
+    
+    b1 = parameters['b1']  
+    b2 = parameters['b2']  
+    b3 = parameters['b3']  
+    b4 = parameters['b4'] 
+    B_AE = parameters['B_AE']  
     
     act_fn = tf.nn.relu
     
@@ -163,19 +256,19 @@ def fwd_propagation_ae_all(x_ph,parameters):
 
 def fwd_propagation(x_ph,parameters):
     
-    with tf.variable_scope('weights'):
-        W1 = parameters['W1']
-        W2 = parameters['W2'] 
-        W3 = parameters['W3'] 
-        W4 = parameters['W4']  
-        W_AE = parameters['W_AE'] 
     
-    with tf.variable_scope('bias'):
-        b1 = parameters['b1']  
-        b2 = parameters['b2']  
-        b3 = parameters['b3']  
-        b4 = parameters['b4'] 
-        B_AE = parameters['B_AE'] 
+    W1 = parameters['W1']
+    W2 = parameters['W2'] 
+    W3 = parameters['W3'] 
+    W4 = parameters['W4']  
+    W_AE = parameters['W_AE'] 
+    
+    
+    b1 = parameters['b1']  
+    b2 = parameters['b2']  
+    b3 = parameters['b3']  
+    b4 = parameters['b4'] 
+    B_AE = parameters['B_AE'] 
     
     act_fn = tf.nn.relu
     
@@ -205,6 +298,29 @@ def compute_cost_fc(logits,y_ph,reg_lambda):
 
 def kl_divergence(p,p_hat):
     return p*tf.log(p)-p*tf.log(p_hat)+(1-p)*tf.log(1-p)-(1-p)*tf.log(1-p_hat)
+
+def compute_cost_ae_1_2(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,rho,beta):
+    
+    diff = x_hat-x_ph
+    
+    p_hat1 = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)
+    p_hat2 = tf.reduce_mean(tf.clip_by_value(hid_layer2,1e-10,1.0,name='clipper'),axis = 0)    
+    
+    kl1 = kl_divergence(rho,p_hat1)
+    kl2 = kl_divergence(rho,p_hat2)
+    
+    kl_loss = beta*(tf.reduce_sum(kl1)+tf.reduce_sum(kl2))
+    
+    W1 = parameters['W1']
+    W2 = parameters['W2'] 
+    W3 = parameters['W3']
+    W_AE_1 = parameters['W_AE_1']
+    W_AE = parameters['W_AE']
+    l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W2)+tf.nn.l2_loss(W3)+tf.nn.l2_loss(W_AE_1)+tf.nn.l2_loss(W_AE))
+    
+    loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+kl_loss+l2_loss
+    
+    return loss
 
 def compute_cost_ae_all(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,hid_layer3,rho,beta):
     
@@ -251,17 +367,17 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
     
     Args:-
     
-    arg1 : x_train
-    arg2 : y_train
-    arg3 : x_test
-    arg4 : y_test
-    arg5 : sc
-    arg6 : learning rate(default)
-    arg7 : rho(default)
-    arg8 : beta(default)
-    arg9 : reg_lambda(default)
-    arg10 : n_epochs(default)
-    arg11: batch_size(default)
+    arg1 : x_train \n
+    arg2 : y_train \n
+    arg3 : x_test \n
+    arg4 : y_test \n
+    arg5 : sc \n
+    arg6 : learning rate(default) \n
+    arg7 : rho(default) \n
+    arg8 : beta(default) \n
+    arg9 : reg_lambda(default) \n
+    arg10 : n_epochs(default) \n
+    arg11: batch_size(default) \n
     '''
     
     # reset default graph
@@ -276,11 +392,13 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
     
     # parameters initialisation
     #parameters = initialise_parameter(n_x,n_y)
-    parameters = initialise_parameter_ae_all(n_x,n_y)
+    #parameters = initialise_parameter_ae_all(n_x,n_y)
+    parameters = initialise_parameter_ae_1_2(n_x,n_y)
     
     # forward propagation
     #logits,x_hat,hid_layer1 = fwd_propagation(x_ph,parameters)
-    logits,x_hat,hid_layer1,hid_layer2,hid_layer3 = fwd_propagation_ae_all(x_ph,parameters)
+    #logits,x_hat,hid_layer1,hid_layer2,hid_layer3 = fwd_propagation_ae_all(x_ph,parameters)
+    logits,x_hat,hid_layer1,hid_layer2 = fwd_propagation_ae_1_2(x_ph,parameters)
     
     # cost history saving
     cost_fc_li = []
@@ -289,7 +407,8 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
     # cost calculation
     cost_fc = compute_cost_fc(logits,y_ph,reg_lambda)
     #cost_ae = compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta)
-    cost_ae = compute_cost_ae_all(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,hid_layer3,rho,beta)
+    #cost_ae = compute_cost_ae_all(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,hid_layer3,rho,beta)
+    cost_ae = compute_cost_ae_1_2(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,rho,beta)
     
     # optimizers
     optimizer_fc = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_fc)
@@ -320,7 +439,7 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
                 print("Epoch: ",epoch+1," cost: ",epoch_cost)
             
             
-        print('Training FC model with AE feature in the 1st layer')
+        print('Training FC model with AE feature in the 1st layer and 2nd layer')
         for epoch in range(n_epochs):
             n_batches = len(X_train_scaled_s) // batch_size
             epoch_cost = 0 
@@ -346,7 +465,7 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
                 continue
             
             elif epoch_cost < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-                saver.save(sess, "./model_ae_fc_all_1/ae_99.5_fc",write_meta_graph=False,global_step=epoch)
+                saver.save(sess, "./model_ae_fc_1_2/ae_99.8_fc",write_meta_graph=False,global_step=epoch)
                 print(f'saving model for epoch : {epoch}')
                 past_training_loss = epoch_cost
             
@@ -367,7 +486,7 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
         
         print("Test accuracy of the AE_FC model is : ", acc.eval(feed_test))
         
-        writer = tf.summary.FileWriter('./tensorboard_ae_fc',sess.graph)
+        writer = tf.summary.FileWriter('./tensorboard_ae_fc_1_2',sess.graph)
         writer.close()
         
     
@@ -401,6 +520,12 @@ if __name__ == '__main__':
     model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 0.001,n_epochs = 50,batch_size=100)
     training_stop = datetime.now()
     print('Training time for the AE+FC model: ',str(training_stop-training_start))
+    
+    #logits ---> Tensor("output_layer/Add:0", shape=(?, 15), dtype=float32)
+    
+    
+    
+    
 # =============================================================================
 #     learning_rate = 1e-3
 #     rho=0.1
