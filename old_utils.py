@@ -174,3 +174,18 @@ def compute_cost_ae_all(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,h
     loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+kl_loss+l2_loss
     
     return loss
+
+def compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta):
+    
+    diff = x_hat-x_ph
+    
+    p_hat = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)    
+    kl = kl_divergence(rho,p_hat)
+    
+    W1 = parameters['W1']
+    W_AE = parameters['W_AE']
+    l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W_AE))
+    
+    loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+beta*tf.reduce_sum(kl)+l2_loss
+    
+    return loss

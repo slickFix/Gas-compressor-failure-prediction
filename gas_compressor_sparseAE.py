@@ -182,22 +182,8 @@ def compute_cost_ae_1_2(x_hat,x_ph,parameters,reg_lambda,hid_layer1,hid_layer2,r
     
     return loss
 
-
-def compute_cost_ae(x_hat,x_ph,parameters,reg_lambda,hid_layer1,rho,beta):
+ 
     
-    diff = x_hat-x_ph
-    
-    p_hat = tf.reduce_mean(tf.clip_by_value(hid_layer1,1e-10,1.0,name='clipper'),axis = 0)    
-    kl = kl_divergence(rho,p_hat)
-    
-    W1 = parameters['W1']
-    W_AE = parameters['W_AE']
-    l2_loss = reg_lambda*(tf.nn.l2_loss(W1)+tf.nn.l2_loss(W_AE))
-    
-    loss = tf.reduce_mean(tf.reduce_sum(diff**2,axis=1))+beta*tf.reduce_sum(kl)+l2_loss
-    
-    return loss
-       
 def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,rho=0.1,beta=3,reg_lambda = 1e-6,n_epochs = 50,batch_size=100):
     ''' 
     Function for executing the NN model
@@ -308,10 +294,11 @@ def model(X_train_scaled_s,y_train_s,X_test_s,y_test_s,sc,learning_rate = 1e-3,r
 #                 past_training_loss = epoch_cost
 # =============================================================================
             
+        # NOT SAVED IN METAGRAPH BUT SAVED IN TENSORBOARD
         with tf.variable_scope('accuracy_cal'):
             correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
             acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
-        
+
         feed_train ={}
         feed_train[x_ph] = X_train_scaled_s.astype(np.float32)
         feed_train[y_ph] = y_train_s.astype(np.float32)
@@ -363,7 +350,7 @@ if __name__ == '__main__':
     training_stop = datetime.now()
     print('Training time for the AE+FC model: ',str(training_stop-training_start))
     
-    
+    tf.reset_default_graph()
     # model evaluation on 40 % not seen dataset
     
     x_eval = df_not_s.iloc[:,:-1]
@@ -389,16 +376,17 @@ if __name__ == '__main__':
         y_ph = graph.get_tensor_by_name('Placeholders/Y_ph:0')
         x_ph = graph.get_tensor_by_name('Placeholders/X_ph:0')
         logits = graph.get_tensor_by_name('output_layer/Add:0')
-        
+                
         correct_pred = tf.equal(tf.math.argmax(logits,axis=1),tf.math.argmax(y_ph,axis=1))
         acc = tf.reduce_mean(tf.cast(correct_pred,'float'))
-        
+
+               
         feed_eval = {}
         X_eval_scaled = sc.transform(x_eval)  #scaling the eval set
         feed_eval[x_ph] = X_eval_scaled.astype(np.float32)
         feed_eval[y_ph] = y_eval.astype(np.float32)
         
+                
         print("Accuracy for the 40% unseen data is : ", acc.eval(feed_eval))
-
-
-
+        
+    
