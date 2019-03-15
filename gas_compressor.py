@@ -163,47 +163,49 @@ with tf.Session() as sess:
     
     sess.run(init)
     
-    for epoch in range(num_epochs):
-        
-        no_batches = len(scaled_data_X_train_s) // batch_size
-        
-        epoch_cost = 0
-        
-        for step in range(no_batches+1):
-                    
-            
-            feed  = {}
-            
-            if step != no_batches:
-                feed[X_ph] = scaled_data_X_train_s[step*batch_size:(step+1)*batch_size].astype(np.float32)
-                feed[Y_ph] = y_train_s[step*batch_size:(step+1)*batch_size].toarray().astype(np.float32) 
-            else:
-                feed[X_ph] = scaled_data_X_train_s[step*batch_size : ].astype(np.float32)
-                feed[Y_ph] = y_train_s[step*batch_size: ].toarray().astype(np.float32) 
-
-            _ , mini_batch_cost = sess.run([train,loss],feed_dict = feed)
-            
-            epoch_cost += mini_batch_cost/no_batches
-            
-        
-        
-        
-        feed_loss = {X_ph: scaled_data_X_train_s.astype(np.float32),
-                     Y_ph: y_train_s.toarray().astype(np.float32)}
-        
-        training_loss = loss.eval(feed_dict=feed_loss)   
-        
-        print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
-        print("Epoch {} Complete. Training epoch_cost: {}".format(epoch,epoch_cost))
-        
-        if epoch == 0:
-            past_training_loss = training_loss
-            continue
-        
-        elif training_loss < past_training_loss:# if new loss is less than past loss "save new model parameters"            
-            saver.save(sess, "./model1/gas_compressor.ckpt")
-            print(f'saving model for epoch : {epoch}')
-            past_training_loss = training_loss
+# =============================================================================
+#     for epoch in range(num_epochs):
+#         
+#         no_batches = len(scaled_data_X_train_s) // batch_size
+#         
+#         epoch_cost = 0
+#         
+#         for step in range(no_batches+1):
+#                     
+#             
+#             feed  = {}
+#             
+#             if step != no_batches:
+#                 feed[X_ph] = scaled_data_X_train_s[step*batch_size:(step+1)*batch_size].astype(np.float32)
+#                 feed[Y_ph] = y_train_s[step*batch_size:(step+1)*batch_size].toarray().astype(np.float32) 
+#             else:
+#                 feed[X_ph] = scaled_data_X_train_s[step*batch_size : ].astype(np.float32)
+#                 feed[Y_ph] = y_train_s[step*batch_size: ].toarray().astype(np.float32) 
+# 
+#             _ , mini_batch_cost = sess.run([train,loss],feed_dict = feed)
+#             
+#             epoch_cost += mini_batch_cost/no_batches
+#             
+#         
+#         
+#         
+#         feed_loss = {X_ph: scaled_data_X_train_s.astype(np.float32),
+#                      Y_ph: y_train_s.toarray().astype(np.float32)}
+#         
+#         training_loss = loss.eval(feed_dict=feed_loss)   
+#         
+#         print("Epoch {} Complete. Training Loss: {}".format(epoch,training_loss))
+#         print("Epoch {} Complete. Training epoch_cost: {}".format(epoch,epoch_cost))
+#         
+#         if epoch == 0:
+#             past_training_loss = training_loss
+#             continue
+#         
+#         elif training_loss < past_training_loss:# if new loss is less than past loss "save new model parameters"            
+#             saver.save(sess, "./model1/gas_compressor.ckpt")
+#             print(f'saving model for epoch : {epoch}')
+#             past_training_loss = training_loss
+# =============================================================================
         
     
     saver.restore(sess,"./model1/gas_compressor.ckpt")
