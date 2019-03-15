@@ -342,6 +342,10 @@ if __name__ == '__main__':
     sc = StandardScaler().fit(X_train_s)
     X_train_scaled_s = sc.transform(X_train_s)
     
+    # saving sc for preprocessing steps
+    with open('sc.pkl','wb') as f:
+        pickle.dump(sc,f)
+    
     # TRAINING TF MODEL
     training_start = datetime.now()
     
