@@ -40,7 +40,7 @@ def api():
     
     app.logger.info('api output: '+ str(output_data))
     
-    print('output data type: '+type(output_data))
+    print('output data type: '+str(type(output_data)))
     
     response = jsonify(output_data.tolist())
     
