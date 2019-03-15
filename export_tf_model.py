@@ -12,7 +12,7 @@ import numpy as np
 import tensorflow as tf
 
 # defining paths
-dataset_path = '/home/siddharth/Downloads/Dataset/P_project/Compressor data'
+dataset_path = '/home/siddharth/Downloads/Dataset/P_projects/Compressor data'
 os.chdir(dataset_path)
 
 saved_model_dir = './model_ae_fc_1_2/ae_99.8_fc-46'
