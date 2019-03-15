@@ -43,7 +43,7 @@ class Server:
         response= self.stub.Predict(request,timeout)
         
         result = response.outputs['out']
-        result_arr = tf.make_ndarray(result)[0]
+        result_arr = tf.make_ndarray(result)
         
         
         return result_arr
